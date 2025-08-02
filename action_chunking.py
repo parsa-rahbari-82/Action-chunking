@@ -5,8 +5,18 @@ Apparently to install box2d-py you need to have swing.
 import numpy as np
 import gymnasium as gym
 import random
+import itertools
 
 env = gym.make("FrozenLake-v1", is_slippery=False)  # Deterministic
+
+def generate_macro_actions(lengths=(2, 3), primitive_actions=(0, 1, 2, 3)):
+    macros = {}
+    idx = 0
+    for l in lengths:
+        for seq in itertools.product(primitive_actions, repeat=l):
+            macros[idx] = list(seq)
+            idx += 1
+    return macros
 
 q_table = np.zeros((env.observation_space.n, env.action_space.n))
 
