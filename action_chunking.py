@@ -64,3 +64,7 @@ for episode in range(episodes):
 
     epsilon = max(min_epsilon, epsilon * epsilon_decay)
     rewards.append(total_reward)
+
+    if (episode + 1) % 100 == 0:
+        avg_reward = np.mean(rewards)
+        print(f"Episode {episode+1}: avg reward = {avg_reward}, epsilon = {epsilon}")
