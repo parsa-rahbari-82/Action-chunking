@@ -2,12 +2,14 @@
 Apparently to install box2d-py you need to have swing.
 """
 
-import numpy as np
-import gymnasium as gym
-import random
 import itertools
+import random
+
+import gymnasium as gym
+import numpy as np
 
 env = gym.make("FrozenLake-v1", is_slippery=False)  # Deterministic
+
 
 def generate_macro_actions(lengths=(2, 3), primitive_actions=(0, 1, 2, 3)):
     macros = {}
@@ -18,36 +20,47 @@ def generate_macro_actions(lengths=(2, 3), primitive_actions=(0, 1, 2, 3)):
             idx += 1
     return macros
 
-q_table = np.zeros((env.observation_space.n, env.action_space.n))
+
+macro_actions = generate_macro_actions()
+num_states = env.observation_space.n
+num_macros = len(macro_actions)
+
+q_table = np.zeros((num_states, num_macros))
 
 alpha = 0.1
-gamma = 0.99       # discount factor
-epsilon = 1.0      # exploration rate
+gamma = 0.99  # discount factor
+epsilon = 1.0  # exploration rate
 epsilon_decay = 0.995
 min_epsilon = 0.01
 episodes = 1000
 
+rewards = []
+
 for episode in range(episodes):
     state, _ = env.reset()
     done = False
-
+    total_reward = 0
     while not done:
         # Epsilon greedy selection
         if random.uniform(0, 1) < epsilon:
-            action = env.action_space.sample()
+            macro_idx = random.choice(list(macro_actions.keys()))
         else:
-            action = np.argmax(q_table[state])
+            macro_idx = np.argmax(q_table[state])
 
-        next_state, reward, done, truncated, _ = env.step(action)
+        start_state = state
+        macro_seq = macro_actions[macro_idx]
+        for action in macro_seq:
+            next_state, reward, done, truncated, _ = env.step(action)
+            total_reward += reward
+            state = next_state
+            if done:
+                break
 
         # Q-learning update
-        old_value = q_table[state, action]
-        next_max = np.max(q_table[next_state])
+        old_value = q_table[start_state, macro_idx]
+        next_max = np.max(q_table[state])
         new_value = old_value + alpha * (reward + gamma * next_max - old_value)
-        q_table[state, action] = new_value
-
-        state = next_state
+        q_table[start_state, macro_idx] = new_value
 
     epsilon = max(min_epsilon, epsilon * epsilon_decay)
-
-print("Test")
+    rewards.append(total_reward)
