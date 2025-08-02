@@ -1,8 +1,10 @@
-# Q-learning (Table based) with action chunking.
 
-My Personal Experience with gym library.
+# Action Chunking with Q-Learning on FrozenLake
 
-TODO:
-- add test and rendering
-- efficient macro actions
-- testing on slippery/other envs.
+This repository demonstrates the use of **action chunking** (macro actions) in a Q-learning agent trained on the `FrozenLake-v1` environment from OpenAI Gym.
+
+## TODOs & Limitations
+
+**Scalability** : Generating all combinations of macro actions is impractical for large action spaces.
+
+**Generalization** : The current implementation only works with deterministic FrozenLake.
